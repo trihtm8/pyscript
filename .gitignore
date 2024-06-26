@@ -1,2 +1,6 @@
 #python run cache
 __pycache__/
+
+#IDE
+.idea/
+.vscode/

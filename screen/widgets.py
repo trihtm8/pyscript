@@ -1,8 +1,7 @@
 import pygame
 import os
-import math
-from pygame.locals import *
 from abc import ABC, abstractmethod
+
 
 class Audio:
     """
@@ -44,6 +43,7 @@ class Audio:
         """
         pygame.mixer.music.stop()
 
+
 class Widget(ABC):
     """
     Abstract Base Class đại diện cho một widget trong giao diện người dùng.
@@ -57,6 +57,7 @@ class Widget(ABC):
         Khởi tạo một widget mới.
         Initializes a new widget.
         """
+        self.children = []
         self.SURFACE = None
         if id is None:
             self.id = self._generate_unique_id()
@@ -66,7 +67,8 @@ class Widget(ABC):
             self.id = id
             Widget._used_ids.add(id)
 
-    def _generate_unique_id(self):
+    @staticmethod
+    def _generate_unique_id():
         """
         Tạo một ID duy nhất cho đối tượng mới.
         Generate a unique ID for a new object.
@@ -107,8 +109,9 @@ class Widget(ABC):
         if self.SURFACE and hasattr(self, 'children'):
             for location, child in self.children:
                 self.SURFACE.blit(child.print(), location)
-                if isinstance(child, Widget):  # Kiểm tra xem child có phải là Widget không
+                if isinstance(child, Widget):
                     child._draw_children()
+
 
 class Screen(Widget):
     """
@@ -132,15 +135,14 @@ class Screen(Widget):
         Khởi tạo màn hình với kích thước và tiêu đề đã cho.
         Initialize the screen with the given size and caption.
         """
-        if not hasattr(self, '_initialized'):  # Kiểm tra nếu chưa khởi tạo
+        if not hasattr(self, '_initialized'):
             super().__init__("_screen")
             self.width = width
             self.height = height
             self.caption = caption
             self.SURFACE = None
             self.children = []
-            self._initialized = True  # Đánh dấu đã khởi tạo
-
+            self._initialized = True
 
     def print(self):
         """
@@ -176,11 +178,12 @@ class Screen(Widget):
         for _, child in children:
             if child.id == search_id:
                 return child
-            elif isinstance(child, Screen):
+            else:
                 result = Screen._getElementByIdHelper(search_id, child.children)
                 if result:
                     return result
         return None
+
 
 class Container(Widget):
     """
@@ -213,7 +216,8 @@ class Container(Widget):
         self.SURFACE.fill(self.background_color)
         self._draw_children()
         return self.SURFACE
-    
+
+
 class Window(Widget):
     """
     Lớp Window đại diện cho một cửa sổ giống cửa sổ của hệ điều hành Windows.
@@ -236,7 +240,7 @@ class Window(Widget):
         self.height = height
         self.title = title
         self.background_color = background_color
-        self.title_height = 20  # Chiều cao của thanh tiêu đề
+        self.title_height = 20
         self.SURFACE = pygame.Surface((width, height + self.title_height))
 
         # Thêm thanh tiêu đề màu xanh
@@ -275,6 +279,7 @@ class Window(Widget):
             for location, child in self.children:
                 self.SURFACE.blit(child.print(), (location[0], location[1] + self.title_height))
 
+
 class Image(Widget):
     """
     Lớp Image đại diện cho một widget hiển thị hình ảnh.
@@ -308,6 +313,7 @@ class Image(Widget):
             pygame.Surface: Bề mặt hiển thị của hình ảnh.
         """
         return self.image
+
 
 class Button(Widget):
     """
@@ -351,7 +357,8 @@ class Button(Widget):
             pygame.Surface: Bề mặt hiển thị của nút.
         """
         return self.surface
-    
+
+
 class Text(Widget):
     """
     Lớp Text đại diện cho một widget hiển thị văn bản.
@@ -383,6 +390,7 @@ class Text(Widget):
             pygame.Surface: Bề mặt hiển thị của văn bản.
         """
         return self.surface
+
 
 class Rectangle(Widget):
     """
@@ -417,6 +425,7 @@ class Rectangle(Widget):
             pygame.Surface: Bề mặt hiển thị của hình chữ nhật.
         """
         return self.surface
+
 
 class RectangleText(Widget):
     """
@@ -463,6 +472,7 @@ class RectangleText(Widget):
         """
         return self.surface
 
+
 class Circle(Widget):
     """
     Lớp Circle đại diện cho một widget hình tròn trên giao diện người dùng.
@@ -495,6 +505,7 @@ class Circle(Widget):
             pygame.Surface: Bề mặt hiển thị của hình tròn.
         """
         return self.surface
+
 
 class CircleText(Widget):
     """
@@ -540,13 +551,15 @@ class CircleText(Widget):
         """
         return self.surface
 
+
 class Textbox(Widget):
     """
     Lớp Textbox đại diện cho một ô nhập văn bản trong giao diện người dùng.
     The Textbox class represents a text input box in the user interface.
     """
 
-    def __init__(self, width, height, text='', font_name='Arial', font_size=24, text_color=(0, 0, 0), background_color=(255, 255, 255), id=None):
+    def __init__(self, width, height, text='', font_name='Arial', font_size=24, text_color=(0, 0, 0),
+                 background_color=(255, 255, 255), id=None):
         """
         Khởi tạo một Textbox mới.
         Initializes a new Textbox.
@@ -580,7 +593,7 @@ class Textbox(Widget):
         """
         self.surface.fill(self.background_color)
         text_surface = self.font.render(self.text, True, self.text_color)
-        self.surface.blit(text_surface, (5, (self.height - text_surface.get_height()) // 2))
+        self.surface.blit(text_surface, (5, (self.height - text_surface.get_height()) // 2 + 1))
 
     def print(self):
         """
@@ -605,16 +618,14 @@ class Textbox(Widget):
         self.render_text()
 
 
-import pygame
-from .widgets import Widget
-
 class Checkbox(Widget):
     """
     Lớp Checkbox đại diện cho một hộp kiểm trong giao diện người dùng.
     The Checkbox class represents a checkbox in the user interface.
     """
 
-    def __init__(self, size, is_checked=False, border_color=(0, 0, 0), check_color=(0, 0, 0), background_color=(255, 255, 255), id=None):
+    def __init__(self, size, is_checked=False, border_color=(0, 0, 0), check_color=(0, 0, 0),
+                 background_color=(255, 255, 255), id=None):
         """
         Khởi tạo một Checkbox mới.
         Initializes a new Checkbox.
@@ -644,8 +655,8 @@ class Checkbox(Widget):
         self.surface.fill(self.background_color)
         pygame.draw.rect(self.surface, self.border_color, (0, 0, self.size, self.size), 2)
         if self.is_checked:
-            pygame.draw.line(self.surface, self.check_color, (4, self.size//2), (self.size//2, self.size-4), 2)
-            pygame.draw.line(self.surface, self.check_color, (self.size//2, self.size-4), (self.size-4, 4), 2)
+            pygame.draw.line(self.surface, self.check_color, (4, self.size // 2), (self.size // 2, self.size - 4), 2)
+            pygame.draw.line(self.surface, self.check_color, (self.size // 2, self.size - 4), (self.size - 4, 4), 2)
 
     def print(self):
         """
@@ -665,3 +676,131 @@ class Checkbox(Widget):
         """
         self.is_checked = not self.is_checked
         self.render_checkbox()
+
+
+class Form(Widget):
+    """
+    Lớp Form đại diện cho một form với khung viền và header.
+    The Form class represents a form with a border and header.
+    """
+
+    def __init__(self, width, height, title, targeted=False, id=None):
+        """
+        Khởi tạo một form mới với khung viền và header.
+        Initializes a new form with a border and header.
+        Parameters:
+            width (int): Chiều rộng của form.
+            height (int): Chiều cao của form (không tính chiều cao header).
+            title (str): Tiêu đề của form.
+            targeted (bool): Trạng thái của form (được target hay không).
+            id (str): ID của form.
+        """
+        super().__init__(id)
+        self.width = width
+        self.height = height
+        self.title = title
+        self.targeted = targeted
+        self.header_height = 20
+        self.SURFACE = pygame.Surface((width, height + self.header_height))
+        self.border_color = pygame.Color('black') if targeted else pygame.Color('gray')
+        self.header_color = pygame.Color(230, 230, 230)
+        self.header_font = pygame.font.Font(None, 16)
+
+        # Vẽ header
+        self.header = pygame.Surface((width, self.header_height))
+        self.header.fill(self.header_color)
+        title_text = self.header_font.render(title, True, pygame.Color('black'))
+        self.header.blit(title_text, (5, 5))
+
+    def print(self):
+        """
+        Phương thức để vẽ form và tất cả các đối tượng con trên đó.
+        Method to draw the form and all the child objects on it.
+        Returns:
+            pygame.Surface: Bề mặt hiển thị của form.
+        """
+        self.SURFACE.fill(pygame.Color('white'))
+        self.SURFACE.blit(self.header, (0, 0))
+        pygame.draw.rect(self.SURFACE, self.border_color, self.SURFACE.get_rect(), 2)
+        self._draw_children()
+
+        return self.SURFACE
+
+    def _draw_children(self):
+        if hasattr(self, 'children'):
+            for location, child in self.children:
+                self.SURFACE.blit(child.print(), (location[0], location[1] + self.header_height))
+
+
+class Input(Widget):
+    """
+    Lớp Input đại diện cho một widget input với label và textbox.
+    The Input class represents an input widget with a label and a textbox.
+    """
+
+    def __init__(self, label_text, width, value='', font_size=16, targeted=False, background_color=(240, 255, 240),
+                 targeted_color=(192, 192, 192), id=None):
+        """
+        Khởi tạo một input mới với label và textbox.
+        Initializes a new input with a label and a textbox.
+        Parameters:
+            label_text (str): Văn bản của label.
+            width (int): Chiều rộng của textbox.
+            value (str): Giá trị mặc định của textbox.
+            font_size (int): Cỡ chữ của label và textbox.
+            targeted (bool): Trạng thái của input (được target hay không).
+            background_color (tuple): Màu nền của textbox.
+            targeted_color (tuple): Màu nền khi textbox được target.
+            id (str): ID của input.
+        """
+        super().__init__(id)
+        self.label_text = label_text
+        self.width = width
+        self.font_size = font_size
+        self.targeted = targeted
+        self.background_color = background_color
+        self.targeted_color = targeted_color
+        self.border_color = pygame.Color('black') if targeted else pygame.Color('gray')
+        self.font = pygame.font.Font(None, font_size)
+        label_width, label_height = self.font.size(label_text)
+        self.height = label_height
+
+        self.SURFACE = pygame.Surface((width + label_width + 10, self.height + 4))
+
+        # Vẽ label
+        self.label = self.font.render(label_text, True, pygame.Color('black'))
+
+        # Sử dụng Textbox
+        self.textbox = Textbox(self.width, self.height, value, id, font_size=self.font_size)
+        self.textbox.background_color = pygame.Color(*background_color) if not targeted else pygame.Color(*
+                                                                                                          targeted_color
+                                                                                                          )
+
+    def print(self):
+        """
+        Phương thức để vẽ input và tất cả các đối tượng con trên đó.
+        Method to draw the input and all the child objects on it.
+        Returns:
+            pygame.Surface: Bề mặt hiển thị của input.
+        """
+        self.SURFACE.fill(pygame.Color('white'))
+        self.SURFACE.blit(self.label, (3, 3))
+        self.SURFACE.blit(self.textbox.print(), (self.label.get_width() + 10, 2))
+        pygame.draw.rect(self.SURFACE, self.border_color, self.SURFACE.get_rect(), 2)
+        return self.SURFACE
+
+    @property
+    def value(self):
+        """
+        Trả về giá trị của thuộc tính text của textbox.
+        Returns the value of the text attribute of the textbox.
+        """
+        return self.textbox.text
+
+    @value.setter
+    def value(self, new_value):
+        """
+        Thiết lập giá trị của thuộc tính text của textbox.
+        Sets the value of the text attribute of the textbox.
+        """
+        self.textbox.text = new_value
