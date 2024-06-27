@@ -1,7 +1,8 @@
 import pygame
 
 from .app.screen import create_screen
-from .app.scripts import apply_scripts
+from .app.scripts import event_scripts
+from .app.scripts import no_event_scripts
 
 
 def main():
@@ -13,7 +14,8 @@ def main():
 
     while True:
         for event in pygame.event.get():
-            apply_scripts(event)
+            event_scripts(event)
+        no_event_scripts()
 
         screen.print()
         pygame.display.flip()

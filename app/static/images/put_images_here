@@ -1,0 +1,8 @@
+
+Hình ảnh được lưu trong thư mục "images" có thể được hiển thị bằng widget Image.
+Images saved in the "images" folder can be displayed using the Image widget.
+
+Bạn có thể tạo thêm những thư mục con để lưu trữ hình ảnh, khi đó, tên file bạn cung cấp
+    khi khởi tạo widget Image sẽ không bao gồm đường dẫn tới thư mục "images"
+You can create additional folders to store images; in that case, the file name you provide
+    when initializing the Image widget will not include the path to "images" folder.

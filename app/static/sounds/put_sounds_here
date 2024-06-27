@@ -1,0 +1,8 @@
+
+Âm thanh được lưu trong thư mục "sounds" có thể được phát bằng widget Audio.
+Sounds saved in the "sounds" folder can be played using the Audio widget.
+
+Bạn có thể tạo thêm những thư mục con để lưu những đoạn âm thanh, khi đó, tên file âm thanh
+    mà bạn cung cấp khi phát âm thanh với widget Audio sẽ không bao gồm đường dẫn tới thư mục "sounds"
+You can create additional folders to store sounds; in that case, the file name
+    you provide when play the sound with Audio widget will not include the path to "sounds" folder.

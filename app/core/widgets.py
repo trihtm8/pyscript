@@ -9,7 +9,7 @@ class Audio:
     The Audio class provides methods for playing sound in pygame.
     """
 
-    SOUND_DIRECTORY = os.path.join(os.path.dirname(__file__), 'static', 'sounds')
+    SOUND_DIRECTORY = os.path.join(os.path.dirname(__file__) + "/..", 'static', 'sounds')
 
     @staticmethod
     def play_sound(sound_filename):
@@ -154,6 +154,7 @@ class Screen(Widget):
         if self.SURFACE is None:
             self.SURFACE = pygame.display.set_mode((self.width, self.height))
             pygame.display.set_caption(self.caption)
+        self.SURFACE.fill(pygame.Color('gray'))
         self._draw_children()
         return self.SURFACE
 
@@ -180,6 +181,88 @@ class Screen(Widget):
                 return child
             else:
                 result = Screen._getElementByIdHelper(search_id, child.children)
+                if result:
+                    return result
+        return None
+
+    @staticmethod
+    def location_of(search_id):
+        """
+        Trả về vị trí (location) của đối tượng con dựa trên ID của nó.
+        Returns the location of the child object based on its ID.
+        Parameters:
+            search_id (str): ID của đối tượng cần tìm.
+        Returns:
+            tuple or None: Vị trí của đối tượng con hoặc None nếu không tìm thấy.
+        """
+        return Screen._location_of_helper(search_id, Screen().children)
+
+    @staticmethod
+    def _location_of_helper(search_id, children):
+        """
+        Phương thức trợ giúp để tìm kiếm đệ quy vị trí của đối tượng con.
+        Helper method to recursively search for the location of the child object.
+        """
+        for location, child in children:
+            if child.id == search_id:
+                return location
+            else:
+                result = Screen._location_of_helper(search_id, child.children)
+                if result:
+                    return result
+        return None
+
+    @staticmethod
+    def change_location(search_id, new_location):
+        """
+        Thay đổi vị trí của đối tượng con dựa trên ID của nó.
+        Changes the location of the child object based on its ID.
+        Parameters:
+            search_id (str): ID của đối tượng cần thay đổi vị trí.
+            new_location (tuple): Vị trí mới của đối tượng.
+        """
+        if not Screen._change_location_helper(search_id, new_location, Screen().children):
+            raise ValueError(f"ID '{search_id}' không tồn tại.")
+
+    @staticmethod
+    def _change_location_helper(search_id, new_location, children):
+        """
+        Phương thức trợ giúp để thay đổi đệ quy vị trí của đối tượng con.
+        Helper method to recursively change the location of the child object.
+        """
+        for index, (location, child) in enumerate(children):
+            if child.id == search_id:
+                children[index] = (new_location, child)
+                return True
+            else:
+                if Screen._change_location_helper(search_id, new_location, child.children):
+                    return True
+        return False
+
+    @staticmethod
+    def root_location(search_id):
+        """
+        Trả về vị trí (location) tính từ root màn hình của widget dựa trên ID của nó.
+        Returns the location relative to the root screen of the widget based on its ID.
+        Parameters:
+            search_id (str): ID của đối tượng cần tìm.
+        Returns:
+            tuple or None: Vị trí của đối tượng con tính từ root hoặc None nếu không tìm thấy.
+        """
+        return Screen._root_location_helper(search_id, Screen().children, (0, 0))
+
+    @staticmethod
+    def _root_location_helper(search_id, children, current_location):
+        """
+        Phương thức trợ giúp để tính toán đệ quy vị trí của đối tượng con từ root.
+        Helper method to recursively calculate the location of the child object from the root.
+        """
+        for location, child in children:
+            new_location = (current_location[0] + location[0], current_location[1] + location[1])
+            if child.id == search_id:
+                return new_location
+            else:
+                result = Screen._root_location_helper(search_id, child.children, new_location)
                 if result:
                     return result
         return None
@@ -286,7 +369,7 @@ class Image(Widget):
     The Image class represents a widget displaying an image.
     """
 
-    IMAGE_DIRECTORY = os.path.join(os.path.dirname(__file__), 'static', 'images')
+    IMAGE_DIRECTORY = os.path.join(os.path.dirname(__file__) + "/..", 'static', 'images')
 
     def __init__(self, image_filename, width, height, id=None):
         """
