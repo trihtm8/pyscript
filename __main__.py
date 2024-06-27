@@ -1,7 +1,7 @@
 import pygame
 
-from .screen.screen import create_screen
-from .screen.scripts import apply_scripts
+from .app.screen import create_screen
+from .app.scripts import apply_scripts
 
 
 def main():

@@ -116,7 +116,7 @@ class Widget(ABC):
 class Screen(Widget):
     """
     Lớp Screen đại diện cho màn hình hiển thị của ứng dụng.
-    The Screen class represents the display screen of the application.
+    The Screen class represents the display app of the application.
     """
 
     _instance = None
@@ -133,7 +133,7 @@ class Screen(Widget):
     def __init__(self, width=800, height=600, caption="PyScript App"):
         """
         Khởi tạo màn hình với kích thước và tiêu đề đã cho.
-        Initialize the screen with the given size and caption.
+        Initialize the app with the given size and caption.
         """
         if not hasattr(self, '_initialized'):
             super().__init__("_screen")
@@ -147,7 +147,7 @@ class Screen(Widget):
     def print(self):
         """
         Phương thức để vẽ màn hình và tất cả các đối tượng con trên đó.
-        Method to draw the screen and all the child objects on it.
+        Method to draw the app and all the child objects on it.
         Returns:
             pygame.Surface: Bề mặt hiển thị của màn hình.
         """

@@ -1,9 +1,8 @@
 import random
 import sys
-import pygame
 from pygame.locals import *
 
-from .widgets import *
+from .core.widgets import *
 
 
 def apply_scripts(event: pygame.event.Event):
