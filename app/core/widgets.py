@@ -252,17 +252,53 @@ class Screen(Widget):
         return Screen._root_location_helper(search_id, Screen().children, (0, 0))
 
     @staticmethod
-    def _root_location_helper(search_id, children, current_location):
+    def _root_location_helper(search_id, children, current_location, has_header=False):
         """
         Phương thức trợ giúp để tính toán đệ quy vị trí của đối tượng con từ root.
         Helper method to recursively calculate the location of the child object from the root.
         """
         for location, child in children:
-            new_location = (current_location[0] + location[0], current_location[1] + location[1])
+            header_height = 20 if has_header else 0
+            new_location = (current_location[0] + location[0], current_location[1] + location[1] + header_height)
             if child.id == search_id:
                 return new_location
             else:
-                result = Screen._root_location_helper(search_id, child.children, new_location)
+                has_header = True \
+                    if child.__class__.__name__ == "Window" or child.__class__.__name__ == "Form" \
+                    else False
+                result = Screen._root_location_helper(search_id, child.children, new_location, has_header)
+                if result:
+                    return result
+        return None
+
+    @staticmethod
+    def get_sizebox(search_id):
+        """
+        Trả về kích thước hiển thị của widget dựa trên ID của nó.
+        Returns the visible size of the widget based on its ID.
+        Parameters:
+            search_id (str): ID của đối tượng cần tìm.
+        Returns:
+            tuple: Kích thước hiển thị của widget (x, y, x + width, y + height).
+        """
+        return Screen._get_sizebox_helper(search_id, Screen().children, 0, 0, Screen().width, Screen().height)
+        pass
+
+    @staticmethod
+    def _get_sizebox_helper(search_id, children, x, y, mx, my):
+        """
+        Phương thức trợ giúp để tính toán đệ quy kích thước hiển thị của widget.
+        Helper method to recursively calculate the visible size of the widget.
+        """
+        for location, child in children:
+            rx = max(x, Screen.root_location(child.id)[0])
+            ry = max(y, Screen.root_location(child.id)[1])
+            rmx = min(mx, Screen.root_location(child.id)[0]+child.width)
+            rmy = min(my, Screen.root_location(child.id)[1]+child.height)
+            if child.id == search_id:
+                return rx, ry, rmx, rmy
+            else:
+                result = Screen._get_sizebox_helper(search_id, child.children, rx, ry, rmx, rmy)
                 if result:
                     return result
         return None
@@ -837,6 +873,7 @@ class Input(Widget):
             id (str): ID của input.
         """
         super().__init__(id)
+        self.height = None
         self.label_text = label_text
         self.width = width
         self.font_size = font_size
@@ -846,18 +883,18 @@ class Input(Widget):
         self.border_color = pygame.Color('black') if targeted else pygame.Color('gray')
         self.font = pygame.font.Font(None, font_size)
         label_width, label_height = self.font.size(label_text)
-        self.height = label_height
+        self.h = label_height
 
-        self.SURFACE = pygame.Surface((width + label_width + 10, self.height + 4))
+        self.SURFACE = pygame.Surface((width + label_width + 10, self.h + 4))
 
         # Vẽ label
         self.label = self.font.render(label_text, True, pygame.Color('black'))
 
         # Sử dụng Textbox
-        self.textbox = Textbox(self.width, self.height, value, id, font_size=self.font_size)
-        self.textbox.background_color = pygame.Color(*background_color) if not targeted else pygame.Color(*
-                                                                                                          targeted_color
-                                                                                                          )
+        self.textbox = Textbox(self.width, self.h, value, id, font_size=self.font_size)
+        self.textbox.background_color = pygame.Color(*background_color) \
+            if not targeted \
+            else pygame.Color(targeted_color)
 
     def print(self):
         """
@@ -870,6 +907,7 @@ class Input(Widget):
         self.SURFACE.blit(self.label, (3, 3))
         self.SURFACE.blit(self.textbox.print(), (self.label.get_width() + 10, 2))
         pygame.draw.rect(self.SURFACE, self.border_color, self.SURFACE.get_rect(), 2)
+        self.height = self.SURFACE.get_size()[1]
         return self.SURFACE
 
     @property
